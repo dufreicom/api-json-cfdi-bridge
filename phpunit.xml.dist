@@ -15,4 +15,7 @@
             <directory suffix=".php">./src/</directory>
         </include>
     </coverage>
+    <php>
+        <env name="XMLRESOLVER_PATH" value="build/resources/"/>
+    </php>
 </phpunit>
