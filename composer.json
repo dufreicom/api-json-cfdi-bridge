@@ -22,7 +22,9 @@
         "ext-openssl": "*",
         "phpcfdi/credentials": "^1.1",
         "phpcfdi/finkok": "^0.3.2",
-        "eclipxe/cfdiutils": "^2.15"
+        "eclipxe/cfdiutils": "^2.15",
+        "slim/slim": "^4.8",
+        "slim/psr7": "^1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
