@@ -12,10 +12,13 @@
     </testsuites>
     <coverage>
         <include>
+            <directory suffix=".php">./app/</directory>
             <directory suffix=".php">./src/</directory>
         </include>
     </coverage>
     <php>
         <env name="XMLRESOLVER_PATH" value="build/resources/"/>
+        <env name="AUTHORIZATION_TOKEN" value="$2y$10$zKP9f1BwnWkyLEUfMI8B7udmU1zpUSS0HHJ1aSKOyTOMv7cerrRrm"/>
+        <env name="AUTHORIZATION_TOKEN_PLAIN" value="testing"/>
     </php>
 </phpunit>

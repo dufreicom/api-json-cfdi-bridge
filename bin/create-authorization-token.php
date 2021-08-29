@@ -1,15 +1,14 @@
 <?php
 
-/** @noinspection PhpUnhandledExceptionInspection */
-
 declare(strict_types=1);
 
-$pass = hash('sha1', random_bytes(256));
-$hash = password_hash($pass, null);
+use Dufrei\ApiJsonCfdiBridge\Values\Token;
+
+$token = Token::createRandom();
 
 echo implode(PHP_EOL, [
-    "Set up the environment with AUTHORIZATION_KEY=$hash",
+    "Set up the environment with AUTHORIZATION_KEY={$token->getHash()}",
     'Your client must use the HTTP authorization header:',
-    "   Authorization: Bearer $pass",
+    "   Authorization: Bearer {$token->getToken()}",
     '',
 ]);
