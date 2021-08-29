@@ -6,13 +6,10 @@ namespace Dufrei\ApiJsonCfdiBridge\Values;
 
 use DOMDocument;
 use JetBrains\PhpStorm\Immutable;
-use Stringable;
 
 #[Immutable]
-final class XmlContent implements Stringable
+final class XmlContent extends Base\StringValueObject
 {
-    use StringValueContentTrait;
-
     public function toDocument(): DOMDocument
     {
         $document = new DOMDocument();
