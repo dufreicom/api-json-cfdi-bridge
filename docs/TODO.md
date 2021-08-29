@@ -11,7 +11,18 @@ para que al hacer la ejecución ya estén disponibles?
 ¿Se consideran parte de las dependencias del proyecto, luego entonces, se instalan al momento de "construir"
 la aplicación y se actualizan periódicamente?
 
-## Agregar API framework
+## Probar los errores
 
-Al momento se han creado todas las acciones que obeden a las reglas de negocio.
-Pero aún no se hace una exposición por API JSON.
+Ya se ha creado el endpoint `/build-cfdi-from-json`, falta validar los datos recibidos y los errores de proceso.
+
+## Registro
+
+¿Se deben generar registros de error? Si es así, ¿qué se hace con ellos?.
+
+## Documentación
+
+Completar la documentación que está en `docs/`.
+
+## Docker
+
+Generar un archivo docker que pueda ejecutar la API en forma contínua.
