@@ -32,12 +32,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Dufrei\\ApiJsonCfdiBridge\\": "src/"
+            "Dufrei\\ApiJsonCfdiBridge\\": "src/",
+            "App\\": "app/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Dufrei\\ApiJsonCfdiBridge\\Tests\\": "tests/"
+            "Dufrei\\ApiJsonCfdiBridge\\Tests\\": "tests/",
+            "App\\Tests\\": "tests/app/"
         }
     },
     "scripts": {
