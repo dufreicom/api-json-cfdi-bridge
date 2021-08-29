@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Controllers\BuildCfdiFromJsonController;
+use Dufrei\ApiJsonCfdiBridge\Config;
+use Dufrei\ApiJsonCfdiBridge\ConfigBuilder;
+use League\Container\Container;
+use League\Container\ReflectionContainer;
+use Slim\App;
+use Slim\Factory\AppFactory;
+
+return (function (): App {
+    $container = new Container();
+    $container->delegate(new ReflectionContainer());
+    $container->add('environment', static fn () => $_ENV);
+    $container->add(Config::class, static fn (array $environment): Config => (new ConfigBuilder($environment))->build())
+        ->addArgument($container->get('environment'));
+
+    $app = AppFactory::create(container: $container);
+
+    $app->post('/build-cfdi-from-json', BuildCfdiFromJsonController::class);
+
+    return $app;
+})();

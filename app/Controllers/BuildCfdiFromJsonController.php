@@ -36,12 +36,13 @@ final class BuildCfdiFromJsonController
         $result = $action->execute($json, $csd);
         $responseData = [
             'converted' => $result->getConvertedXml(),
-            'sourcestrin' => $result->getPreCfdi()->getSourceString(),
+            'sourcestring' => $result->getPreCfdi()->getSourceString(),
             'precfdi' => $result->getPreCfdi()->getXml(),
             'uuid' => $result->getCfdi()->getUuid(),
             'xml' => $result->getCfdi()->getXml(),
         ];
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $responseBody = $this->streamFactory->createStream(json_encode($responseData));
         return $response
             ->withStatus(200)
