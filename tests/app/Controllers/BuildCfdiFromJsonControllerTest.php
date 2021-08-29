@@ -32,7 +32,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $container = $this->getContainer();
         $container->add(Factory::class, $factory);
 
-        $request = $this->createFormRequest('POST', '/build-cfdi-from-json', [
+        $request = $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
             'json' => $this->fileContents('invoice.json'),
             'certificate' => $this->fileContents('fake-csd/EKU9003173C9.cer'),
             'privatekey' => $this->fileContents('fake-csd/EKU9003173C9.key'),
@@ -48,5 +48,14 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $this->assertStringEqualsFile($this->filePath('signed.xml'), $responseData->precfdi);
         $this->assertEquals($cfdi->getUuid(), $responseData->uuid);
         $this->assertEquals($cfdi->getXml(), $responseData->xml);
+    }
+
+    public function testControllerAccessUsesToken(): void
+    {
+        $request = $this->createFormRequest('POST', '/build-cfdi-from-json');
+
+        $response = $this->getApp()->handle($request);
+
+        $this->assertSame(401, $response->getStatusCode());
     }
 }
