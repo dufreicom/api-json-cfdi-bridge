@@ -51,7 +51,7 @@ class PreCfdiSigner
         $this->findFirstElement('/cfdi:Comprobante')?->setAttribute('Sello', $signature);
     }
 
-    /** @throws UnableToSignXml */
+    /** @throws UnableToSignXmlException */
     public function putIssuerRfc(string $rfc): void
     {
         $issuer = $this->findFirstElement('/cfdi:Comprobante/cfdi:Emisor');
@@ -61,20 +61,20 @@ class PreCfdiSigner
 
         $currentRfc = $issuer->getAttribute('Rfc');
         if ('' !== $currentRfc && $currentRfc !== $rfc) {
-            throw new UnableToSignXml("The issuer RFC on data $currentRfc is different from CSD $rfc");
+            throw new UnableToSignXmlException("The issuer RFC on data $currentRfc is different from CSD $rfc");
         }
 
         $issuer->setAttribute('Rfc', $rfc);
     }
 
-    /** @throws UnableToSignXml */
+    /** @throws UnableToSignXmlException */
     public function buildSourceString(): string
     {
         try {
             $xsltLocation = $this->xmlResolver->resolve(CfdiDefaultLocations::XSLT_33);
             return $this->xsltBuilder->build($this->document->saveXML() ?: '', $xsltLocation);
         } catch (Throwable $exception) {
-            throw new UnableToSignXml('Unable to build source string', $exception);
+            throw new UnableToSignXmlException('Unable to build source string', $exception);
         }
     }
 

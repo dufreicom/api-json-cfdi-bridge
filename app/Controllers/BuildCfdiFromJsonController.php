@@ -6,7 +6,7 @@ namespace App\Controllers;
 
 use Dufrei\ApiJsonCfdiBridge\Factory;
 use Dufrei\ApiJsonCfdiBridge\JsonToXmlConverter\JsonToXmlConvertException;
-use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXmlException;
 use Dufrei\ApiJsonCfdiBridge\StampService\ServiceException;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
 use Dufrei\ApiJsonCfdiBridge\Values\CredentialCsd;
@@ -66,7 +66,7 @@ final class BuildCfdiFromJsonController
         $action = $this->actionFactory->createBuildCfdiFromJsonAction();
         try {
             $result = $action->execute($json, $csd);
-        } catch (JsonToXmlConvertException | UnableToSignXml | StampException $exception) {
+        } catch (JsonToXmlConvertException | UnableToSignXmlException | StampException $exception) {
             return $this->validationError($response, [$exception->getMessage()]);
         } catch (ServiceException $exception) {
             return $this->executionError($response, $exception);

@@ -11,7 +11,7 @@ use CfdiUtils\CadenaOrigen\XsltBuilderInterface;
 use CfdiUtils\XmlResolver\XmlResolver;
 use DOMDocument;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\PreCfdiSigner;
-use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXmlException;
 use Dufrei\ApiJsonCfdiBridge\Tests\TestCase;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -109,7 +109,7 @@ final class PreCfdiSignerTest extends TestCase
 
         $signer = $this->createSignerWithMockedDependences($document);
 
-        $this->expectException(UnableToSignXml::class);
+        $this->expectException(UnableToSignXmlException::class);
         $this->expectExceptionMessage("The issuer RFC on data $sourceRfc is different from CSD $differentRfc");
         $signer->putIssuerRfc($differentRfc);
     }
@@ -168,8 +168,11 @@ final class PreCfdiSignerTest extends TestCase
 
         $signer = new PreCfdiSigner($document, $xmlResolver, $xsltBuilder);
 
-        /** @var UnableToSignXml $caughtException */
-        $caughtException = $this->catchException(fn () => $signer->buildSourceString(), UnableToSignXml::class);
+        /** @var UnableToSignXmlException $caughtException */
+        $caughtException = $this->catchException(
+            fn () => $signer->buildSourceString(),
+            UnableToSignXmlException::class,
+        );
 
         $this->assertSame('Unable to build source string', $caughtException->getMessage());
         $this->assertSame($resultException, $caughtException->getPrevious());
