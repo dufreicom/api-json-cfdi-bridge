@@ -8,25 +8,26 @@ Este proyecto es una JSON API para generar un CFDI a partir de datos JSON prefor
 
 ```shell
 composer create-project dufrei/api-json-cfdi-bridge api-json-cfdi-bridge
+```
 
-cat .env.example .env | \
-    sed 's/AUTHORIZATION_KEY=.*/$(php bin/create-authorization-token.php | grep -o "AUTHORIZATION_KEY=.*")' 
-    sed 's/FINKOK_ENVIRONMENT=.*/FINKOK_ENVIRONMENT=production/' | \
-    sed 's/FINKOK_USERNAME=.*/FINKOK_USERNAME=your-finkok-username/' | \
-    sed 's/FINKOK_PASSWORD=.*/FINKOK_PASSWORD=your-finkok-password/'
+## Ejecución con variables de entorno
 
-php -S 0.0.0.0:8080 -t public/
+```shell
+env AUTHORIZATION_TOKEN='$2y$10$guL9tPaNOeS/6rMGwIy.ZeH/1BmPbcRGiGzjjkRS7SDI0bM9mBMV' \
+    FINKOK_PRODUCTION=yes FINKOK_USERNAME='usuario' FINKOK_PASSWORD='secreto' XMLRESOLVER_PATH="resources" \
+    php -S 0.0.0.0:8080 -t public/
 ```
 
 ## Configuración
 
-- [Variables de configuración del entorno](configuracion/entorno.md)
+- [Variables de configuración del entorno](configuracion.md)
 
-## Seguridad
+## Docker
 
-En las llamadas a la API es necesario entregar un HTTP Token autorización.
+Este proyecto provee los archivos necesarios para crear una imagen y la documentación para ejecutar contenedores.
 
-- [Acerca del token de acceso](seguridad-token-acceso.md)
+- [Construcción de la imagen](docker-construir.md)
+- [Crear una instancia de ejecución](docker-ejecutar.md)
 
 ## End points
 
