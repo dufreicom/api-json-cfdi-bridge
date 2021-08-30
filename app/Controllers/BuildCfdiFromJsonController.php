@@ -13,7 +13,7 @@ use Dufrei\ApiJsonCfdiBridge\Values\JsonContent;
 use PhpCfdi\Credentials\Credential;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpBadRequestException;
+use Rakit\Validation\Validator;
 use Slim\Psr7\Factory\StreamFactory;
 use Throwable;
 
@@ -27,60 +27,72 @@ final class BuildCfdiFromJsonController
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $inputJson = $this->requestStringValue($request, 'json');
-        if ('' === $inputJson) {
-            throw (new HttpBadRequestException($request))->setTitle('Invalid json');
+        $inputs = $request->getParsedBody();
+        $validator = new Validator();
+        $validation = $validator->make($inputs, [
+            'json' => ['required', 'json'],
+            'certificate' => ['required'],
+            'privatekey' => ['required'],
+            'passphrase' => ['present'],
+        ]);
+        $validation->setAliases([
+            'json' => 'json input',
+            'certificate' => 'certificate content',
+            'privatekey' => 'private key content',
+            'passphrase' => 'private key passphrase',
+        ]);
+        $validation->validate();
+        if ($validation->fails()) {
+            $errors = [];
+            foreach ($validation->errors()->toArray() as $name => $error) {
+                $errors[$name] = implode(PHP_EOL, $error);
+            }
+            return $this->validationError($response, $errors);
         }
-
-        $inputCertificate = $this->requestStringValue($request, 'certificate');
-        if ('' === $inputCertificate) {
-            throw (new HttpBadRequestException($request))->setTitle('Invalid certificate');
-        }
-
-        $inputPrivateKey = $this->requestStringValue($request, 'privatekey');
-        if ('' === $inputPrivateKey) {
-            throw (new HttpBadRequestException($request))->setTitle('Invalid private key');
-        }
-
-        $inputPassPhrase = $this->requestStringValue($request, 'passphrase');
+        $inputs = $validation->getValidData();
 
         try {
-            $credential = Credential::create($inputCertificate, $inputPrivateKey, $inputPassPhrase);
+            $credential = Credential::create($inputs['certificate'], $inputs['privatekey'], $inputs['passphrase']);
         } catch (Throwable $exception) {
-            throw (new HttpBadRequestException($request, previous: $exception))
-                ->setTitle('Unable to create a credential using certificate, private key and passphrase');
+            return $this->validationError($response, [
+                'Unable to create a credential using certificate, private key and passphrase',
+                $exception->getMessage(),
+            ]);
         }
 
-        $json = new JsonContent($inputJson);
+        $json = new JsonContent($inputs['json']);
         $csd = new CredentialCsd($credential);
         $action = $this->actionFactory->createBuildCfdiFromJsonAction();
         try {
             $result = $action->execute($json, $csd);
         } catch (JsonToXmlConvertException|UnableToSignXml|StampException $exception) {
-            throw (new HttpBadRequestException($request, previous: $exception))->setTitle($exception->getMessage());
+            return $this->validationError($response, [$exception->getMessage()]);
         }
-        $responseData = [
+
+        return $this->jsonResponse($response, 200, (object) [
             'converted' => $result->getConvertedXml(),
             'sourcestring' => $result->getPreCfdi()->getSourceString(),
             'precfdi' => $result->getPreCfdi()->getXml(),
             'uuid' => $result->getCfdi()->getUuid(),
             'xml' => $result->getCfdi()->getXml(),
-        ];
+        ]);
+    }
 
+    private function validationError(Response $response, array $errors): Response
+    {
+        return $this->jsonResponse($response, 400, (object) [
+            'message' => 'Invalid input',
+            'errors' => $errors,
+        ]);
+    }
+
+    private function jsonResponse(Response $response, int $status, object $responseData): Response
+    {
         /** @noinspection PhpUnhandledExceptionInspection */
         $responseBody = $this->streamFactory->createStream(json_encode($responseData));
         return $response
-            ->withStatus(200)
+            ->withStatus($status)
             ->withHeader('Content-Type', 'application/json')
             ->withBody($responseBody);
-    }
-
-    private function requestStringValue(Request $request, string $input)
-    {
-        $value = $request->getParsedBody()[$input] ?? null;
-        if (! is_string($value)) {
-            return '';
-        }
-        return $value;
     }
 }

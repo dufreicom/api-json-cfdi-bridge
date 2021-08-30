@@ -80,36 +80,30 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $this->assertSame(401, $response->getStatusCode());
     }
 
-    public function testControllerValidatesJson(): void
+    public function testValidatesNoInputs(): void
     {
         $request = $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken());
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $this->assertSame('Invalid json', json_decode((string) $response->getBody())->message);
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Invalid input', $responseData->message);
+        $this->assertSame('The json input is required', $responseData->errors->json);
+        $this->assertSame('The certificate content is required', $responseData->errors->certificate);
+        $this->assertSame('The private key content is required', $responseData->errors->privatekey);
+        $this->assertSame('The private key passphrase must be present', $responseData->errors->passphrase);
     }
 
-    public function testControllerValidatesCertificate(): void
+    public function testValidatesJsonInput(): void
     {
-        $request = $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
-            'json' => '{}',
-        ]);
+        $this->setUpContainerWithFakeStampService();
+        $request = $this->createValidFormRequestWithJson('invalid json');
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $this->assertSame('Invalid certificate', json_decode((string) $response->getBody())->message);
-    }
-
-    public function testControllerValidatesPrivateKey(): void
-    {
-        $request = $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
-            'json' => '{}',
-            'certificate' => 'CER',
-        ]);
-        $response = $this->getApp()->handle($request);
-
-        $this->assertSame(400, $response->getStatusCode());
-        $this->assertSame('Invalid private key', json_decode((string) $response->getBody())->message);
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Invalid input', $responseData->message);
+        $this->assertSame('The json input must be a valid JSON string', $responseData->errors->json);
     }
 
     public function testControllerValidatesCredential(): void
@@ -118,24 +112,17 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             'json' => '{}',
             'certificate' => 'CER',
             'privatekey' => 'KEY',
+            'passphrase' => '',
         ]);
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Invalid input', $responseData->message);
         $this->assertSame(
             'Unable to create a credential using certificate, private key and passphrase',
-            json_decode((string) $response->getBody())->message
+            $responseData->errors[0]
         );
-    }
-
-    public function testUnableToConvert(): void
-    {
-        $this->setUpContainerWithFakeStampService();
-        $request = $this->createValidFormRequestWithJson('invalid json');
-        $response = $this->getApp()->handle($request);
-
-        $this->assertSame(400, $response->getStatusCode());
-        $this->assertSame('Unable to parse JSON', json_decode((string) $response->getBody())->message);
     }
 
     public function testUnableToSignXml(): void
@@ -147,7 +134,9 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $this->assertStringContainsString('EKU9003173C9', json_decode((string) $response->getBody())->message);
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Invalid input', $responseData->message);
+        $this->assertStringContainsString('EKU9003173C9', $responseData->errors[0]);
     }
 
     public function testUnableToStampCfdi(): void
@@ -158,6 +147,8 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $this->assertStringContainsString('Fake message', json_decode((string) $response->getBody())->message);
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Invalid input', $responseData->message);
+        $this->assertStringContainsString('Fake message', $responseData->errors[0]);
     }
 }
