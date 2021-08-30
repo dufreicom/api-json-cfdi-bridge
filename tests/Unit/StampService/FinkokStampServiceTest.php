@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpUnhandledExceptionInspection */
+
 declare(strict_types=1);
 
 namespace Dufrei\ApiJsonCfdiBridge\Tests\Unit\StampService;
@@ -106,8 +108,6 @@ final class FinkokStampServiceTest extends TestCase
     }
 
     /**
-     * @param bool $withXml
-     * @param bool $withUuid
      * @testWith [false, false]
      *           [true, false]
      *           [false, true]

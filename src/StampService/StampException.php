@@ -14,7 +14,7 @@ class StampException extends RuntimeException
 
     public function __construct(string $message, StampErrors $errors, Throwable $previous = null)
     {
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, previous: $previous);
         $this->errors = $errors;
     }
 

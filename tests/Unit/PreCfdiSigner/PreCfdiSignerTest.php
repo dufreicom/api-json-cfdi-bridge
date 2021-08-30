@@ -13,6 +13,7 @@ use DOMDocument;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\PreCfdiSigner;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
 use Dufrei\ApiJsonCfdiBridge\Tests\TestCase;
+use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 
 final class PreCfdiSignerTest extends TestCase
@@ -136,8 +137,41 @@ final class PreCfdiSignerTest extends TestCase
             ->method('build')
             ->with($document->saveXML(), $localXsltLocation)
             ->willReturn($sourceString);
+
         $signer = new PreCfdiSigner($document, $xmlResolver, $xsltBuilder);
 
         $this->assertSame($sourceString, $signer->buildSourceString());
+    }
+
+    public function testBuildSourceStringException(): void
+    {
+        $remoteXsltLocation = CfdiDefaultLocations::XSLT_33;
+        $localXsltLocation = '/resources/fake/location.xsd';
+        $resultException = new Exception('ups, something went wrong');
+
+        $document = $this->createXmlDocument(
+            '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" Version="3.3"/>',
+        );
+
+        /** @var XmlResolver&MockObject $xmlResolver */
+        $xmlResolver = $this->createMock(XmlResolver::class);
+        $xmlResolver->expects($this->once())
+            ->method('resolve')
+            ->with($remoteXsltLocation)
+            ->willReturn($localXsltLocation);
+
+        /** @var XsltBuilderInterface&MockObject $xsltBuilder */
+        $xsltBuilder = $this->createMock(XsltBuilderInterface::class);
+        $xsltBuilder->expects($this->once())
+            ->method('build')
+            ->willThrowException($resultException);
+
+        $signer = new PreCfdiSigner($document, $xmlResolver, $xsltBuilder);
+
+        /** @var UnableToSignXml $caughtException */
+        $caughtException = $this->catchException(fn () => $signer->buildSourceString(), UnableToSignXml::class);
+
+        $this->assertSame('Unable to build source string', $caughtException->getMessage());
+        $this->assertSame($resultException, $caughtException->getPrevious());
     }
 }

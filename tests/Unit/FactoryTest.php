@@ -76,19 +76,18 @@ final class FactoryTest extends TestCase
     }
 
     /**
-     * @param bool $useProduction
      * @testWith [true]
      *           [false]
      */
     public function testCreateStampServiceForcedEnvironment(bool $useProduction): void
     {
         $factory = Factory::create([
-            'FINKOK_PRODUCTION' => $useProduction ? 'true' : 'false',
+            'FINKOK_PRODUCTION' => (! $useProduction) ? 'true' : 'false',
             'FINKOK_USERNAME' => 'username',
             'FINKOK_PASSWORD' => 'password',
         ]);
         /** @var FinkokStampService $stampService */
-        $stampService = $factory->createStampService();
+        $stampService = $factory->createStampService($useProduction);
         $this->assertSame($useProduction, $stampService->isProduction());
     }
 

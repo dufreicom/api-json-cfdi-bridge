@@ -13,7 +13,7 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use LogicException;
-use RuntimeException;
+use Throwable;
 
 class PreCfdiSigner
 {
@@ -73,8 +73,8 @@ class PreCfdiSigner
         try {
             $xsltLocation = $this->xmlResolver->resolve(CfdiDefaultLocations::XSLT_33);
             return $this->xsltBuilder->build($this->document->saveXML() ?: '', $xsltLocation);
-        } catch (RuntimeException $exception) {
-            throw new UnableToSignXml('Unable to vuild source string', $exception);
+        } catch (Throwable $exception) {
+            throw new UnableToSignXml('Unable to build source string', $exception);
         }
     }
 

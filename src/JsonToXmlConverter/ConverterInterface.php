@@ -8,5 +8,10 @@ use Stringable;
 
 interface ConverterInterface
 {
+    /**
+     * @param Stringable|string $json
+     * @return string
+     * @throws JsonToXmlConvertException
+     */
     public function convert(Stringable|string $json): string;
 }

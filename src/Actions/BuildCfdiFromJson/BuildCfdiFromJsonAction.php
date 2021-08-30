@@ -23,11 +23,6 @@ class BuildCfdiFromJsonAction
     ) {
     }
 
-    public function getConvertJsonToXmlAction(): ConvertJsonToXmlAction
-    {
-        return $this->convertJsonToXmlAction;
-    }
-
     public function getSignXmlAction(): SignXmlAction
     {
         return $this->signXmlAction;
