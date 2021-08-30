@@ -93,11 +93,6 @@ class Converter implements ConverterInterface
         return '/' . ltrim(sprintf('%s/%s', $parent->getNodePath() ?? '', $elementName ?: '<empty-node-name>'), '/');
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     * @see https://github.com/eclipxe13/CfdiUtils/blob/f4b071b2c798bd6a8439945f05f32411c12308e1/src/CfdiUtils/Utils/Xml.php#L83
-     */
     public function isValidTagName(string $name): bool
     {
         return Xml::isValidXmlName($name);
