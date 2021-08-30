@@ -21,7 +21,7 @@ use PhpCfdi\Finkok\QuickFinkok;
 class Factory
 {
     final public function __construct(
-        private Config $config
+        private Config $config,
     ) {
     }
 
@@ -31,15 +31,14 @@ class Factory
      */
     public static function create(array $environment = null): self
     {
-        $builder = new ConfigBuilder($environment ?? $_ENV);
-        $config = $builder->build();
+        $config = (new ConfigBuilder($environment ?? $_ENV))->build();
         return new static($config);
     }
 
     public function createXmlResolver(): XmlResolver
     {
         return new XmlResolver(
-            $this->config->getXmlResolverPath()
+            $this->config->getXmlResolverPath(),
         );
     }
 
@@ -81,7 +80,7 @@ class Factory
     }
 
     public function createStampCfdiAction(
-        ?StampServiceInterface $stampService = null
+        ?StampServiceInterface $stampService = null,
     ): StampCfdiAction {
         return new StampCfdiAction($stampService ?? $this->createStampService());
     }
@@ -95,7 +94,7 @@ class Factory
         return new BuildCfdiFromJsonAction(
             new ConvertJsonToXmlAction(),
             $this->createSignXmlAction($xmlResolver, $xsltBuilder),
-            $this->createStampCfdiAction($stampService)
+            $this->createStampCfdiAction($stampService),
         );
     }
 }

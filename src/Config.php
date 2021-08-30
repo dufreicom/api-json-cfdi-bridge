@@ -7,12 +7,18 @@ namespace Dufrei\ApiJsonCfdiBridge;
 class Config
 {
     public function __construct(
+        private string $authorizationTokenHash,
         private string $xmlResolverPath,
         private string $xsltBuilderSaxonPath,
         private string $finkokUsername,
         private string $finkokPassword,
         private bool $finkokOnProduction,
     ) {
+    }
+
+    public function getAuthorizationTokenHash(): string
+    {
+        return $this->authorizationTokenHash;
     }
 
     public function getXmlResolverPath(): string

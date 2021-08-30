@@ -120,7 +120,7 @@ final class PreCfdiSignerTest extends TestCase
         $sourceString = '||3.3||';
 
         $document = $this->createXmlDocument(
-            '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" Version="3.3"/>'
+            '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" Version="3.3"/>',
         );
 
         /** @var XmlResolver&MockObject $xmlResolver */

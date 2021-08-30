@@ -26,7 +26,7 @@ class ConvertJsonToXmlAction
     {
         $contents = $this->converter->convert($json);
         return new ConvertJsonToXmlResult(
-            new XmlContent($contents)
+            new XmlContent($contents),
         );
     }
 }

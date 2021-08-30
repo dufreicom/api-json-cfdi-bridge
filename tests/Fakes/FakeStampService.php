@@ -16,7 +16,7 @@ final class FakeStampService implements StampServiceInterface
      * @param array<Cfdi|StampException> $stampQueue
      */
     public function __construct(
-        private array $stampQueue
+        private array $stampQueue,
     ) {
     }
 
