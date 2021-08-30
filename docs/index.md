@@ -32,6 +32,10 @@ env AUTHORIZATION_TOKEN='$2y$10$guL9tPaNOeS/6rMGwIy.ZeH/1BmPbcRGiGzjjkRS7SDI0bM9
 
 - [Variables de configuración del entorno](configuracion.md)
 
+## API
+
+- [Documentación de la API](api.md)
+
 ## Docker
 
 Este proyecto provee los archivos necesarios para crear una imagen y la documentación para ejecutar contenedores.
