@@ -8,7 +8,7 @@ class StampError
 {
     public function __construct(
         private string $code,
-        private string $message
+        private string $message,
     ) {
     }
 

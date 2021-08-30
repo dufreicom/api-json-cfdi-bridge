@@ -27,7 +27,7 @@ final class BuildCfdiFromJsonController
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $inputs = $request->getParsedBody();
+        $inputs = (array) ($request->getParsedBody() ?? []);
         $validator = new Validator();
         $validation = $validator->make($inputs, [
             'json' => ['required', 'json'],
@@ -65,7 +65,7 @@ final class BuildCfdiFromJsonController
         $action = $this->actionFactory->createBuildCfdiFromJsonAction();
         try {
             $result = $action->execute($json, $csd);
-        } catch (JsonToXmlConvertException|UnableToSignXml|StampException $exception) {
+        } catch (JsonToXmlConvertException | UnableToSignXml | StampException $exception) {
             return $this->validationError($response, [$exception->getMessage()]);
         }
 
@@ -78,6 +78,11 @@ final class BuildCfdiFromJsonController
         ]);
     }
 
+    /**
+     * @param Response $response
+     * @param string[] $errors
+     * @return Response
+     */
     private function validationError(Response $response, array $errors): Response
     {
         return $this->jsonResponse($response, 400, (object) [
@@ -86,13 +91,13 @@ final class BuildCfdiFromJsonController
         ]);
     }
 
+    /** @noinspection PhpUnhandledExceptionInspection */
     private function jsonResponse(Response $response, int $status, object $responseData): Response
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $responseBody = $this->streamFactory->createStream(json_encode($responseData));
+        $responseStream = $this->streamFactory->createStream(json_encode($responseData, flags: JSON_THROW_ON_ERROR));
         return $response
             ->withStatus($status)
             ->withHeader('Content-Type', 'application/json')
-            ->withBody($responseBody);
+            ->withBody($responseStream);
     }
 }

@@ -59,14 +59,14 @@ final class FinkokStampServiceTest extends TestCase
         $cachedException = $this->catchException(
             fn (): Cfdi => $service->stamp(new XmlContent('<xml/>')),
             StampException::class,
-            'Finkok::stamp didn\'t create the exception'
+            'Finkok::stamp didn\'t create the exception',
         );
 
         $this->assertSame('Finkok stamp error', $cachedException->getMessage());
         $this->assertSame($remoteException, $cachedException->getPrevious());
         $this->assertSame(
             ["[ERROR] {$remoteException->getMessage()}"],
-            $cachedException->getErrors()->messages()
+            $cachedException->getErrors()->messages(),
         );
     }
 
@@ -94,7 +94,7 @@ final class FinkokStampServiceTest extends TestCase
         $cachedException = $this->catchException(
             fn (): Cfdi => $service->stamp(new XmlContent('<xml/>')),
             StampException::class,
-            'Finkok::stamp didn\'t create the exception'
+            'Finkok::stamp didn\'t create the exception',
         );
 
         $this->assertSame('Finkok stamp did not return the CFDI', $cachedException->getMessage());

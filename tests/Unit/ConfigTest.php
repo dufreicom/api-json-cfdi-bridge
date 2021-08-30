@@ -22,7 +22,7 @@ final class ConfigTest extends TestCase
             $xsltBuilderSaxonPath,
             $finkokUsername,
             $finkokPassword,
-            $finkokOnProduction
+            $finkokOnProduction,
         );
 
         $this->assertSame($xmlResolverPath, $config->getXmlResolverPath());

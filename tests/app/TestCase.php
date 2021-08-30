@@ -71,7 +71,7 @@ abstract class TestCase extends \Dufrei\ApiJsonCfdiBridge\Tests\TestCase
         string $method,
         string $action,
         string $authorizationToken = '',
-        array $inputs = []
+        array $inputs = [],
     ): ServerRequestInterface {
         return $this->createRequest($method, $action, array_filter([
             'Authorization' => ($authorizationToken) ? "Bearer $authorizationToken" : null,

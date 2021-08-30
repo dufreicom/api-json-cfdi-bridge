@@ -107,7 +107,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertSame(
             'Unable to create a credential using certificate, private key and passphrase',
-            $responseData->errors[0]
+            $responseData->errors[0],
         );
     }
 
@@ -128,7 +128,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
     public function testUnableToStampCfdi(): void
     {
         $this->setUpContainerWithFakeStampService(
-            new StampException('Fake message', new StampErrors())
+            new StampException('Fake message', new StampErrors()),
         );
         $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
         $response = $this->getApp()->handle($request);
