@@ -14,9 +14,7 @@ use Slim\Factory\AppFactory;
 return (function (): App {
     $container = new Container();
     $container->delegate(new ReflectionContainer());
-    $container->add('environment', static fn () => $_ENV);
-    $container->add(Config::class, static fn (array $environment): Config => (new ConfigBuilder($environment))->build())
-        ->addArgument($container->get('environment'));
+    $container->add(Config::class, static fn (): Config => (new ConfigBuilder($_ENV))->build());
 
     $app = AppFactory::create(container: $container);
 

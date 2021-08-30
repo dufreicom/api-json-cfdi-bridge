@@ -38,7 +38,7 @@ abstract class TestCase extends \Dufrei\ApiJsonCfdiBridge\Tests\TestCase
 
     protected function getTestingToken(): string
     {
-        $token = $_ENV['AUTHORIZATION_TOKEN_PLAIN'] ?? null;
+        $token = $_ENV['AUTHORIZATION_TOKEN_PLAIN'] ?? '';
         if (! is_string($token) || '' === $token) {
             throw new LogicException('Token for testing must be environment defined');
         }

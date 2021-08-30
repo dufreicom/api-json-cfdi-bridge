@@ -6,11 +6,13 @@ namespace Dufrei\ApiJsonCfdiBridge\Tests\Unit;
 
 use Dufrei\ApiJsonCfdiBridge\Config;
 use Dufrei\ApiJsonCfdiBridge\Tests\TestCase;
+use Dufrei\ApiJsonCfdiBridge\Values\Token;
 
 final class ConfigTest extends TestCase
 {
     public function testConfigValues(): void
     {
+        $authorizationTokenHash = Token::createRandom()->getHash();
         $xmlResolverPath = '/path';
         $xsltBuilderSaxonPath = '/opt/saxonb';
         $finkokUsername = 'user@domain.com';
@@ -18,6 +20,7 @@ final class ConfigTest extends TestCase
         $finkokOnProduction = false;
 
         $config = new Config(
+            $authorizationTokenHash,
             $xmlResolverPath,
             $xsltBuilderSaxonPath,
             $finkokUsername,
@@ -25,6 +28,7 @@ final class ConfigTest extends TestCase
             $finkokOnProduction,
         );
 
+        $this->assertSame($authorizationTokenHash, $config->getAuthorizationTokenHash());
         $this->assertSame($xmlResolverPath, $config->getXmlResolverPath());
         $this->assertSame($xsltBuilderSaxonPath, $config->getXsltBuilderSaxonPath());
         $this->assertSame($finkokUsername, $config->getFinkokUsername());

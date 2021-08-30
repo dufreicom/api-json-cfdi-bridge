@@ -21,6 +21,7 @@ class ConfigBuilder
     public function build(): Config
     {
         return new Config(
+            $this->getValueAsString('AUTHORIZATION_TOKEN'),
             $this->buildPath($this->getValueAsString('XMLRESOLVER_PATH')),
             $this->buildPath($this->getValueAsString('SAXONB_PATH')),
             $this->getValueAsString('FINKOK_USERNAME'),
