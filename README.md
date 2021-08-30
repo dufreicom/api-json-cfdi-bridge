@@ -16,11 +16,6 @@
 
 Este proyecto es una JSON API para generar un CFDI a partir de datos JSON preformateados.
 
-## Instalación
-
-Usa [composer](https://getcomposer.org/)
-
-
 ## Documentación
 
 Mira la información que se encuentra en la [carpeta de documentación](docs/index.md)
