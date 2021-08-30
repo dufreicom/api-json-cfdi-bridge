@@ -7,13 +7,18 @@ namespace App\Tests\Controllers;
 use App\Controllers\BuildCfdiFromJsonController;
 use App\Tests\TestCase;
 use Dufrei\ApiJsonCfdiBridge\Factory;
+use Dufrei\ApiJsonCfdiBridge\StampService\FinkokStampService;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampErrors;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
+use Dufrei\ApiJsonCfdiBridge\StampService\StampServiceInterface;
 use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeFactory;
 use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeStampService;
 use Dufrei\ApiJsonCfdiBridge\Values\Cfdi;
 use Dufrei\ApiJsonCfdiBridge\Values\Uuid;
 use Dufrei\ApiJsonCfdiBridge\Values\XmlContent;
+use Exception;
+use PhpCfdi\Finkok\QuickFinkok;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
@@ -31,10 +36,15 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         ]);
     }
 
-    private function setUpContainerWithFakeStampService(Cfdi|StampException|null $result = null): void
+    private function setUpContainerWithPedefinedStampServiceResponse(Cfdi|StampException|null $result = null): void
+    {
+        $stampService = new FakeStampService(array_filter([$result]));
+        $this->setUpContainerWithFakeStampService($stampService);
+    }
+
+    private function setUpContainerWithFakeStampService(StampServiceInterface $stampService): void
     {
         $factory = FakeFactory::create();
-        $stampService = new FakeStampService(array_filter([$result]));
         $factory->setStampService($stampService);
         $this->getContainer()->add(Factory::class, $factory);
     }
@@ -45,7 +55,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             new Uuid('CEE4BE01-ADFA-4DEB-8421-ADD60F0BEDAC'),
             new XmlContent($this->fileContents('stamped.xml')),
         );
-        $this->setUpContainerWithFakeStampService($cfdi);
+        $this->setUpContainerWithPedefinedStampServiceResponse($cfdi);
         $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
         $response = $this->getApp()->handle($request);
 
@@ -82,7 +92,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
 
     public function testValidatesJsonInput(): void
     {
-        $this->setUpContainerWithFakeStampService();
+        $this->setUpContainerWithPedefinedStampServiceResponse();
         $request = $this->createValidFormRequestWithJson('invalid json');
         $response = $this->getApp()->handle($request);
 
@@ -113,7 +123,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
 
     public function testUnableToSignXml(): void
     {
-        $this->setUpContainerWithFakeStampService();
+        $this->setUpContainerWithPedefinedStampServiceResponse();
         // replace issuer rfc to produce error
         $json = str_replace('EKU9003173C9', 'AAA010101AAA', $this->fileContents('invoice.json'));
         $request = $this->createValidFormRequestWithJson($json);
@@ -127,7 +137,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
 
     public function testUnableToStampCfdi(): void
     {
-        $this->setUpContainerWithFakeStampService(
+        $this->setUpContainerWithPedefinedStampServiceResponse(
             new StampException('Fake message', new StampErrors()),
         );
         $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
@@ -137,5 +147,32 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $responseData = json_decode((string) $response->getBody());
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertStringContainsString('Fake message', $responseData->errors[0]);
+    }
+
+    public function testServiceError(): void
+    {
+        $remoteException = new Exception('ups something happened', previous: new Exception('deep exception'));
+
+        /** @var QuickFinkok&MockObject $quickFinkok */
+        $quickFinkok = $this->createMock(QuickFinkok::class);
+        $quickFinkok->expects($this->once())
+            ->method('stamp')
+            ->willThrowException($remoteException);
+
+        $this->setUpContainerWithFakeStampService(
+            new FinkokStampService($quickFinkok),
+        );
+        $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
+        $response = $this->getApp()->handle($request);
+
+        $this->assertSame(500, $response->getStatusCode());
+        $responseData = json_decode((string) $response->getBody());
+        $this->assertSame('Error on call Finkok stamp', $responseData->message);
+        $expectedErrors = [
+            'Error on call Finkok stamp',
+            'ups something happened',
+            'deep exception',
+        ];
+        $this->assertSame($expectedErrors, $responseData->errors);
     }
 }

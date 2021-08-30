@@ -42,8 +42,7 @@ class FinkokStampService implements StampServiceInterface
         try {
             $result = $this->quickFinkok->stamp($preCfdi->getValue());
         } catch (Throwable $exception) {
-            $errors = new StampErrors(new StampError('ERROR', $exception->getMessage()));
-            throw new StampException('Finkok stamp error', $errors, $exception);
+            throw new ServiceException('Error on call Finkok stamp', $preCfdi, $exception);
         }
 
         if ('' === $result->xml()) {

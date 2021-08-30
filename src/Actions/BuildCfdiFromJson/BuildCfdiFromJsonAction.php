@@ -9,6 +9,7 @@ use Dufrei\ApiJsonCfdiBridge\Actions\SignXml\SignXmlAction;
 use Dufrei\ApiJsonCfdiBridge\Actions\StampCfdi\StampCfdiAction;
 use Dufrei\ApiJsonCfdiBridge\JsonToXmlConverter\JsonToXmlConvertException;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\StampService\ServiceException;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
 use Dufrei\ApiJsonCfdiBridge\Values\Csd;
 use Dufrei\ApiJsonCfdiBridge\Values\JsonContent;
@@ -41,6 +42,7 @@ class BuildCfdiFromJsonAction
      * @throws UnableToSignXml
      * @throws JsonToXmlConvertException
      * @throws StampException
+     * @throws ServiceException
      */
     public function execute(JsonContent $json, Csd $csd): CreateCfdiFromJsonResult
     {

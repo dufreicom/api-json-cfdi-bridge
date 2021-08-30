@@ -13,6 +13,7 @@ interface StampServiceInterface
      * @param XmlContent $preCfdi
      * @return Cfdi
      * @throws StampException
+     * @throws ServiceException
      */
     public function stamp(XmlContent $preCfdi): Cfdi;
 }

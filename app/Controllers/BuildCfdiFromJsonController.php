@@ -7,6 +7,7 @@ namespace App\Controllers;
 use Dufrei\ApiJsonCfdiBridge\Factory;
 use Dufrei\ApiJsonCfdiBridge\JsonToXmlConverter\JsonToXmlConvertException;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\StampService\ServiceException;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
 use Dufrei\ApiJsonCfdiBridge\Values\CredentialCsd;
 use Dufrei\ApiJsonCfdiBridge\Values\JsonContent;
@@ -67,6 +68,8 @@ final class BuildCfdiFromJsonController
             $result = $action->execute($json, $csd);
         } catch (JsonToXmlConvertException | UnableToSignXml | StampException $exception) {
             return $this->validationError($response, [$exception->getMessage()]);
+        } catch (ServiceException $exception) {
+            return $this->executionError($response, $exception);
         }
 
         return $this->jsonResponse($response, 200, (object) [
@@ -87,6 +90,19 @@ final class BuildCfdiFromJsonController
     {
         return $this->jsonResponse($response, 400, (object) [
             'message' => 'Invalid input',
+            'errors' => $errors,
+        ]);
+    }
+
+    private function executionError(Response $response, Throwable $exception): Response
+    {
+        $errors = [];
+        for ($current = $exception; null !== $current; $current = $current->getPrevious()) {
+            $errors[] = $current->getMessage();
+        }
+
+        return $this->jsonResponse($response, 500, (object) [
+            'message' => $exception->getMessage(),
             'errors' => $errors,
         ]);
     }
