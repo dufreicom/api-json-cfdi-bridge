@@ -6,7 +6,6 @@ namespace App\Tests\Controllers;
 
 use App\Controllers\BuildCfdiFromJsonController;
 use App\Tests\TestCase;
-use Dufrei\ApiJsonCfdiBridge\Config;
 use Dufrei\ApiJsonCfdiBridge\Factory;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampErrors;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
@@ -46,24 +45,12 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             new Uuid('CEE4BE01-ADFA-4DEB-8421-ADD60F0BEDAC'),
             new XmlContent($this->fileContents('stamped.xml')),
         );
-        $factory = new FakeFactory($this->getContainer()->get(Config::class));
-        $factory->setStampService(new FakeStampService([$cfdi]));
-
-        // override factory to use a preset stamp service
-        $container = $this->getContainer();
-        $container->add(Factory::class, $factory);
-
-        $request = $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
-            'json' => $this->fileContents('invoice.json'),
-            'certificate' => $this->fileContents('fake-csd/EKU9003173C9.cer'),
-            'privatekey' => $this->fileContents('fake-csd/EKU9003173C9.key'),
-            'passphrase' => trim($this->fileContents('fake-csd/EKU9003173C9-password.txt')),
-        ]);
-
+        $this->setUpContainerWithFakeStampService($cfdi);
+        $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
         $response = $this->getApp()->handle($request);
-        $responseData = json_decode((string) $response->getBody());
 
         $this->assertSame(200, $response->getStatusCode());
+        $responseData = json_decode((string) $response->getBody());
         $this->assertStringEqualsFile($this->filePath('converted.xml'), $responseData->converted);
         $this->assertStringEqualsFile($this->filePath('sourcestring.txt'), $responseData->sourcestring);
         $this->assertStringEqualsFile($this->filePath('signed.xml'), $responseData->precfdi);
@@ -74,7 +61,6 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
     public function testControllerAccessUsesToken(): void
     {
         $request = $this->createFormRequest('POST', '/build-cfdi-from-json');
-
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(401, $response->getStatusCode());
@@ -141,8 +127,9 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
 
     public function testUnableToStampCfdi(): void
     {
-        $stampException = new StampException('Fake message', new StampErrors());
-        $this->setUpContainerWithFakeStampService($stampException);
+        $this->setUpContainerWithFakeStampService(
+            new StampException('Fake message', new StampErrors())
+        );
         $request = $this->createValidFormRequestWithJson($this->fileContents('invoice.json'));
         $response = $this->getApp()->handle($request);
 
