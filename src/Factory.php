@@ -31,8 +31,7 @@ class Factory
      */
     public static function create(array $environment = null): self
     {
-        $builder = new ConfigBuilder($environment ?? $_ENV);
-        $config = $builder->build();
+        $config = (new ConfigBuilder($environment ?? $_ENV))->build();
         return new static($config);
     }
 
