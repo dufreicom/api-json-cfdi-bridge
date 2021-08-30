@@ -32,6 +32,13 @@ RUN set -e \
     && composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader \
     && rm -rf "$(composer config cache-dir --global)" "$(composer config data-dir --global)" "$(composer config home --global)"
 
+ARG XMLRESOLVER_PATH=""
+
+RUN set -e \
+    if [ -n "$XMLRESOLVER_PATH" ]; then \
+        bin/resource-sat-xml-download "$XMLRESOLVER_PATH"; \
+    fi
+
 EXPOSE 80
 
 COPY ./docker/supervisord.conf /etc/supervisor/supervisord.conf
