@@ -9,7 +9,7 @@ use Dufrei\ApiJsonCfdiBridge\StampService\StampServiceInterface;
 
 class FakeFactory extends Factory
 {
-    private ?StampServiceInterface $stampService;
+    private ?StampServiceInterface $stampService = null;
 
     public function setStampService(?StampServiceInterface $stampService): self
     {

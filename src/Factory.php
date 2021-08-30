@@ -20,20 +20,20 @@ use PhpCfdi\Finkok\QuickFinkok;
 
 class Factory
 {
-    public function __construct(
+    final public function __construct(
         private Config $config
     ) {
     }
 
     /**
      * @param array<string, mixed>|null $environment
-     * @return self
+     * @return static
      */
     public static function create(array $environment = null): self
     {
         $builder = new ConfigBuilder($environment ?? $_ENV);
         $config = $builder->build();
-        return new self($config);
+        return new static($config);
     }
 
     public function createXmlResolver(): XmlResolver
