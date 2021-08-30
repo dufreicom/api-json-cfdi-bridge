@@ -13,7 +13,7 @@ la aplicación y se actualizan periódicamente?
 
 ## Probar los errores
 
-Ya se ha creado el endpoint `/build-cfdi-from-json`, falta validar los datos recibidos y los errores de proceso.
+Se necesita simular un error de comunicación con Finkok, este error no debe tratarse como un error 400.
 
 ## Registro
 

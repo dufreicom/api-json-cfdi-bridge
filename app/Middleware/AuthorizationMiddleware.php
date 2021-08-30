@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Exception\HttpUnauthorizedException;
 
 final class AuthorizationMiddleware implements MiddlewareInterface
 {
@@ -18,9 +18,7 @@ final class AuthorizationMiddleware implements MiddlewareInterface
         $token = new Token($this->obtainToken($request));
         $hash = $this->obtainHash();
         if (! $token->verify($hash)) {
-            return (new ResponseFactory())
-                ->createResponse(401)
-                ->withHeader('WWW-Authenticate', 'Bearer');
+            throw new HttpUnauthorizedException($request);
         }
         return $handler->handle($request);
     }
