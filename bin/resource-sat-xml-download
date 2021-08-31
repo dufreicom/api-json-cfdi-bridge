@@ -1,0 +1,36 @@
+#!/bin/bash -e
+
+if [ "$1" == '-h' -o "$1" == "--help" ]; then
+    command="$(basename "$0")"
+    echo "$command command will download the sat xml resources into a given destination"
+    echo "Syntax: $command [destination-directory]"
+    echo "If no destination is set then will use environment variable XMLRESOLVER_PATH"
+    echo "If no destination is set then will use .env file variable XMLRESOLVER_PATH"
+    echo "If no destination is set then execution will fail"
+    exit 0
+fi
+
+XMLRESOLVER_PATH="${1:-$XMLRESOLVER_PATH}"
+if [ -z "$XMLRESOLVER_PATH" -a -f ".env" ]; then
+    XMLRESOLVER_PATH_ENV="$(grep --max-count=1 "^XMLRESOLVER_PATH=" .env | xargs)"
+    if [ -n "$XMLRESOLVER_PATH_ENV" ]; then
+        export "$XMLRESOLVER_PATH_ENV"
+    fi
+fi
+
+if [ -z "$XMLRESOLVER_PATH" ]; then
+    echo "No destination set" 1>&2
+    exit 1
+fi
+
+echo -n "Downloading SAT XML resources to $XMLRESOLVER_PATH ... "
+
+export GIT_TERMINAL_PROMPT=0
+
+TEMPDIR="$(mktemp -d)"
+git clone --quiet --depth 1 https://github.com/phpcfdi/resources-sat-xml "$TEMPDIR"
+mkdir -p "$XMLRESOLVER_PATH"
+cp -r "$TEMPDIR"/resources/* "$XMLRESOLVER_PATH"
+rm -r -f "$TEMPDIR"
+
+echo "OK";

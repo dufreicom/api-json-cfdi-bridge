@@ -7,7 +7,7 @@ namespace Dufrei\ApiJsonCfdiBridge\Actions\SignXml;
 use CfdiUtils\CadenaOrigen\XsltBuilderInterface;
 use CfdiUtils\XmlResolver\XmlResolver;
 use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\PreCfdiSigner;
-use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXmlException;
 use Dufrei\ApiJsonCfdiBridge\Values\Csd;
 use Dufrei\ApiJsonCfdiBridge\Values\PreCfdi;
 use Dufrei\ApiJsonCfdiBridge\Values\SourceString;
@@ -31,16 +31,16 @@ class SignXmlAction
         return $this->xsltBuilder;
     }
 
-    /** @throws UnableToSignXml */
+    /** @throws UnableToSignXmlException */
     public function execute(XmlContent $xml, Csd $csd): SignXmlResult
     {
         if (! $csd->isCsd()) {
             $message = sprintf('The certificate %s from %s is not a CSD', $csd->getCertificateNumber(), $csd->getRfc());
-            throw new UnableToSignXml($message);
+            throw new UnableToSignXmlException($message);
         }
         if (! $csd->isValid()) {
             $message = sprintf('The certificate %s from %s is expired', $csd->getCertificateNumber(), $csd->getRfc());
-            throw new UnableToSignXml($message);
+            throw new UnableToSignXmlException($message);
         }
 
         $document = $xml->toDocument();

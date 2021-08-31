@@ -8,7 +8,7 @@ namespace Dufrei\ApiJsonCfdiBridge\Tests\Integration\Actions;
 
 use DOMElement;
 use Dufrei\ApiJsonCfdiBridge\Factory;
-use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXml;
+use Dufrei\ApiJsonCfdiBridge\PreCfdiSigner\UnableToSignXmlException;
 use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeCsd;
 use Dufrei\ApiJsonCfdiBridge\Tests\TestCase;
 use Dufrei\ApiJsonCfdiBridge\Values\XmlContent;
@@ -50,7 +50,7 @@ final class SignXmlActionTest extends TestCase
         $certificateNumber = '30001000000400002434';
         $csd = new FakeCsd($rfc, 'MIIFuzCCA6...', $certificateNumber, false, true);
 
-        $this->expectException(UnableToSignXml::class);
+        $this->expectException(UnableToSignXmlException::class);
         $this->expectExceptionMessage("The certificate $certificateNumber from $rfc is not a CSD");
         $action->execute($xml, $csd);
     }
@@ -65,7 +65,7 @@ final class SignXmlActionTest extends TestCase
         $certificateNumber = '30001000000400002434';
         $csd = new FakeCsd($rfc, 'MIIFuzCCA6...', $certificateNumber, true, false);
 
-        $this->expectException(UnableToSignXml::class);
+        $this->expectException(UnableToSignXmlException::class);
         $this->expectExceptionMessage("The certificate $certificateNumber from $rfc is expired");
         $action->execute($xml, $csd);
     }

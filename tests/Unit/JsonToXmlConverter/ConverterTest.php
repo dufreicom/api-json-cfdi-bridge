@@ -138,7 +138,7 @@ final class ConverterTest extends TestCase
         $json = '{ "": {} }';
         $converter = new Converter();
         $this->expectException(JsonToXmlConvertException::class);
-        $this->expectExceptionMessage('Invalid element name on /{<empty-node-name>}');
+        $this->expectExceptionMessage('Invalid element name on /<empty-node-name>');
         $converter->convert($json);
     }
 
@@ -147,7 +147,16 @@ final class ConverterTest extends TestCase
         $json = '{ "root": "" }';
         $converter = new Converter();
         $this->expectException(JsonToXmlConvertException::class);
-        $this->expectExceptionMessage('Invalid element content on /{root}');
+        $this->expectExceptionMessage('Invalid element content on /root');
+        $converter->convert($json);
+    }
+
+    public function testErrorOnInvalidNodeContentInvalidAttributes(): void
+    {
+        $json = '{"root": {"child": {"_attributes": "foo"}}}';
+        $converter = new Converter();
+        $this->expectException(JsonToXmlConvertException::class);
+        $this->expectExceptionMessage('Invalid element content on /root/child/_attributes');
         $converter->convert($json);
     }
 }

@@ -1,10 +1,13 @@
 <?php
 
+/** @noinspection PhpUnhandledExceptionInspection */
+
 declare(strict_types=1);
 
 namespace Dufrei\ApiJsonCfdiBridge\Tests\Unit\StampService;
 
 use Dufrei\ApiJsonCfdiBridge\StampService\FinkokStampService;
+use Dufrei\ApiJsonCfdiBridge\StampService\ServiceException;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
 use Dufrei\ApiJsonCfdiBridge\Tests\TestCase;
 use Dufrei\ApiJsonCfdiBridge\Values\Cfdi;
@@ -45,6 +48,7 @@ final class FinkokStampServiceTest extends TestCase
 
     public function testStampCatchesFinkokError(): void
     {
+        $preCfdi = new XmlContent('<xml/>');
         $remoteException = new Exception('oh no, oh no, oh no no no no no');
 
         /** @var QuickFinkok&MockObject $quickFinkok */
@@ -55,19 +59,16 @@ final class FinkokStampServiceTest extends TestCase
 
         $service = new FinkokStampService($quickFinkok);
 
-        /** @var StampException $cachedException */
+        /** @var ServiceException $cachedException */
         $cachedException = $this->catchException(
-            fn (): Cfdi => $service->stamp(new XmlContent('<xml/>')),
-            StampException::class,
+            fn (): Cfdi => $service->stamp($preCfdi),
+            ServiceException::class,
             'Finkok::stamp didn\'t create the exception',
         );
 
-        $this->assertSame('Finkok stamp error', $cachedException->getMessage());
+        $this->assertSame('Error on call Finkok stamp', $cachedException->getMessage());
+        $this->assertSame($preCfdi, $cachedException->getPreCfdi());
         $this->assertSame($remoteException, $cachedException->getPrevious());
-        $this->assertSame(
-            ["[ERROR] {$remoteException->getMessage()}"],
-            $cachedException->getErrors()->messages(),
-        );
     }
 
     public function testStampCatchesWithErrors(): void
@@ -107,8 +108,6 @@ final class FinkokStampServiceTest extends TestCase
     }
 
     /**
-     * @param bool $withXml
-     * @param bool $withUuid
      * @testWith [false, false]
      *           [true, false]
      *           [false, true]

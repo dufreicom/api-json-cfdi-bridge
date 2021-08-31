@@ -40,6 +40,8 @@ Si `XMLRESOLVER_PATH` es un valor vacío, entonces siempre usará los archivos d
 Si `XMLRESOLVER_PATH` contiene un valor se considerará como una ruta relativa o absoluta.
 Es absoluta si inicia con `/`, es relativa en caso contrario.
 
+Vea la herramienta de [actualización de los recursos SAT XML](recursos-sat-xml.md).
+
 ## `SAXONB_PATH`
 
 Vea: <https://cfdiutils.readthedocs.io/es/latest/componentes/cadena-de-origen.html#php-y-xlst-version-2>

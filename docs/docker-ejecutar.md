@@ -73,6 +73,17 @@ Your client must use the HTTP authorization header:
    Authorization: Bearer ad418b254561de0b16253a312b360f3973ca8a16
 ```
 
+## Actualización de recursos
+
+Con el siguiente comando se usará una imagen que esté en ejecución llamada `api-json-cfdi-bridge`
+y se ejecutará `bin/resource-sat-xml-download`. Como el comando usa la configuración de la variable
+de entorno `XMLRESOLVER_PATH` y esta debió de configurarse desde la ejecución del proyecto, entonces
+no es necesario pasar ningún parámetro adicional.
+
+```shell
+docker exec api-json-cfdi-bridge bin/resource-sat-xml-download
+```
+
 ## Saxon-B XSLT Processor
 
 La imagen de docker ya incluye el procesador XSLT Saxon-B, lo puede usar si especifica la variable de entorno

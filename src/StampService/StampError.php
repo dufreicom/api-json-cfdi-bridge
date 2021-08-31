@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Dufrei\ApiJsonCfdiBridge\StampService;
 
-class StampError
+use JsonSerializable;
+use Stringable;
+
+class StampError implements Stringable, JsonSerializable
 {
     public function __construct(
         private string $code,
@@ -25,5 +28,14 @@ class StampError
     public function __toString(): string
     {
         return "[$this->code] $this->message";
+    }
+
+    /** @return array<string, string> */
+    public function jsonSerialize(): array
+    {
+        return [
+            'code' => $this->code,
+            'message' => $this->message,
+        ];
     }
 }

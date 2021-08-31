@@ -13,7 +13,6 @@ use Stringable;
 
 class Converter implements ConverterInterface
 {
-    /** @throws JsonToXmlConvertException */
     public function convert(Stringable|string $json): string
     {
         $document = $this->convertToDocument($json);
@@ -47,18 +46,12 @@ class Converter implements ConverterInterface
         return $document;
     }
 
-    /**
-     * @param DOMDocument $document
-     * @param DOMDocument|DOMElement $parent
-     * @param string $elementName
-     * @param mixed $contents
-     * @throws JsonToXmlConvertException
-     */
+    /** @throws JsonToXmlConvertException */
     private function convertRecursive(
         DOMDocument $document,
         DOMDocument|DOMElement $parent,
         string $elementName,
-        $contents,
+        mixed $contents,
     ): void {
         // process multiple entries when not un root element
         if (is_array($contents) && $parent instanceof DOMElement) {
@@ -81,33 +74,25 @@ class Converter implements ConverterInterface
         }
 
         $element = $document->createElement($elementName);
+        $parent->appendChild($element);
 
         foreach (get_object_vars($contents) as $name => $data) {
-            if (! is_string($name)) {
-                continue;
-            }
             if ('_attributes' === $name && $data instanceof stdClass) {
                 foreach (get_object_vars($data) as $attributeName => $attributeValue) {
                     $element->setAttribute($attributeName, (string) $attributeValue);
                 }
                 continue;
             }
+
             $this->convertRecursive($document, $element, $name, $data);
         }
-
-        $parent->appendChild($element);
     }
 
     private function buildElementPath(DOMDocument|DOMElement $parent, string $elementName): string
     {
-        return sprintf('%s{%s}', $parent->getNodePath() ?? '', $elementName ?: '<empty-node-name>');
+        return '/' . ltrim(sprintf('%s/%s', $parent->getNodePath() ?? '', $elementName ?: '<empty-node-name>'), '/');
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     * @see https://github.com/eclipxe13/CfdiUtils/blob/f4b071b2c798bd6a8439945f05f32411c12308e1/src/CfdiUtils/Utils/Xml.php#L83
-     */
     public function isValidTagName(string $name): bool
     {
         return Xml::isValidXmlName($name);
