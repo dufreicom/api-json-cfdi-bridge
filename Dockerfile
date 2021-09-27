@@ -34,7 +34,7 @@ RUN set -e \
 
 ARG XMLRESOLVER_PATH=""
 
-RUN set -e \
+RUN set -e && \
     if [ -n "$XMLRESOLVER_PATH" ]; then \
         bin/resource-sat-xml-download "$XMLRESOLVER_PATH"; \
     fi
