@@ -59,7 +59,7 @@ class Factory
      */
     public function createStampService(bool $asProduction = null): StampServiceInterface
     {
-        $asProduction = $asProduction ?? $this->config->isFinkokOnProduction();
+        $asProduction ??= $this->config->isFinkokOnProduction();
         $environment = $asProduction ? FinkokEnvironment::makeProduction() : FinkokEnvironment::makeDevelopment();
         $settings = new FinkokSettings(
             $this->config->getFinkokUsername(),
@@ -74,8 +74,8 @@ class Factory
         ?XmlResolver $xmlResolver = null,
         ?XsltBuilderInterface $xsltBuilder = null,
     ): SignXmlAction {
-        $xmlResolver = $xmlResolver ?? $this->createXmlResolver();
-        $xsltBuilder = $xsltBuilder ?? $this->createXsltBuilder();
+        $xmlResolver ??= $this->createXmlResolver();
+        $xsltBuilder ??= $this->createXsltBuilder();
         return new SignXmlAction($xmlResolver, $xsltBuilder);
     }
 
@@ -90,7 +90,7 @@ class Factory
         ?XsltBuilderInterface $xsltBuilder = null,
         ?StampServiceInterface $stampService = null,
     ): BuildCfdiFromJsonAction {
-        $stampService = $stampService ?? $this->createStampService();
+        $stampService ??= $this->createStampService();
         return new BuildCfdiFromJsonAction(
             new ConvertJsonToXmlAction(),
             $this->createSignXmlAction($xmlResolver, $xsltBuilder),
