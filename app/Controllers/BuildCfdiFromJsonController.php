@@ -15,7 +15,9 @@ use PhpCfdi\Credentials\Credential;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Rakit\Validation\Validator;
+use RuntimeException;
 use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\UploadedFile;
 use Throwable;
 
 final class BuildCfdiFromJsonController
@@ -28,7 +30,10 @@ final class BuildCfdiFromJsonController
 
     public function __invoke(Request $request, Response $response): Response
     {
-        $inputs = (array) ($request->getParsedBody() ?? []);
+        $inputs = array_merge(
+            (array) ($request->getParsedBody() ?? []),
+            $this->uploadedFilesToInputs($request->getUploadedFiles()),
+        );
         $validator = new Validator();
         $validation = $validator->make($inputs, [
             'json' => ['required', 'json'],
@@ -66,8 +71,11 @@ final class BuildCfdiFromJsonController
         $action = $this->actionFactory->createBuildCfdiFromJsonAction();
         try {
             $result = $action->execute($json, $csd);
-        } catch (JsonToXmlConvertException | UnableToSignXmlException | StampException $exception) {
+        } catch (JsonToXmlConvertException | UnableToSignXmlException $exception) {
             return $this->validationError($response, [$exception->getMessage()]);
+        } catch (StampException $exception) {
+            $messages = array_merge([$exception->getMessage()], $exception->getErrors()->messages());
+            return $this->validationError($response, $messages);
         } catch (ServiceException $exception) {
             return $this->executionError($response, $exception);
         }
@@ -115,5 +123,32 @@ final class BuildCfdiFromJsonController
             ->withStatus($status)
             ->withHeader('Content-Type', 'application/json')
             ->withBody($responseStream);
+    }
+
+    /**
+     * @param UploadedFile[] $uploadedFiles
+     * @return array<string, string>
+     */
+    private function uploadedFilesToInputs(array $uploadedFiles): array
+    {
+        $inputs = [];
+        foreach ($uploadedFiles as $key => $uploadedFile) {
+            $inputs[$key] = $this->uploadedFileToContent($uploadedFile);
+        }
+        return array_filter($inputs);
+    }
+
+    private function uploadedFileToContent(UploadedFile $uploadedFile): string
+    {
+        try {
+            if (UPLOAD_ERR_OK !== $uploadedFile->getError()) {
+                return '';
+            }
+            return (string) $uploadedFile->getStream();
+        } catch (RuntimeException) {
+            return '';
+        } finally {
+            unlink($uploadedFile->getFilePath());
+        }
     }
 }
