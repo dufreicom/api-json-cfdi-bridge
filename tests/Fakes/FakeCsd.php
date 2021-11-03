@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dufrei\ApiJsonCfdiBridge\Tests\Fakes;
 
-use Closure;
 use Dufrei\ApiJsonCfdiBridge\Values\Csd;
+use LogicException;
 use Stringable;
 
 class FakeCsd implements Csd
@@ -16,7 +16,7 @@ class FakeCsd implements Csd
         private string $certificateNumber,
         private bool $certificateIsCsd,
         private bool $certificateIsValid,
-        private ?Closure $signClosure = null,
+        private ?string $predefinedSignature = null,
     ) {
     }
 
@@ -47,10 +47,10 @@ class FakeCsd implements Csd
 
     public function sign(Stringable|string $sourceString): string
     {
-        if (null === $this->signClosure) {
-            throw new \LogicException('To call FakeCsd::sign you must provide a closure');
+        if (null === $this->predefinedSignature) {
+            throw new LogicException('To call FakeCsd::sign you must provide a predefined signature');
         }
 
-        return call_user_func($this->signClosure, $sourceString);
+        return $this->predefinedSignature;
     }
 }

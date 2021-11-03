@@ -25,7 +25,7 @@ final class SignXmlActionTest extends TestCase
         $certificateNumber = '30001000000400002434';
         $certificateContents = base64_encode(hash('sha256', 'CERTIFICADO', true)) ?: 'CERTIFICADO';
         $signature = base64_encode(hash('sha256', 'SELLO', true)) ?: 'SELLO';
-        $csd = new FakeCsd($rfc, $certificateContents, $certificateNumber, true, true, fn (): string => $signature);
+        $csd = new FakeCsd($rfc, $certificateContents, $certificateNumber, true, true, $signature);
 
         $result = $action->execute($xml, $csd);
         $document = $result->getPreCfdi()->getXml()->toDocument();

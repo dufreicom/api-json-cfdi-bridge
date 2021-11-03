@@ -26,7 +26,7 @@ class StampErrors implements IteratorAggregate, Countable, JsonSerializable
         $this->count = count($errors);
     }
 
-    /** @return Traversable<StampError> */
+    /** @return Traversable<int|string, StampError> */
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->errors);

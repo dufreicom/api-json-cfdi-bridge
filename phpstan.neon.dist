@@ -1,13 +1,8 @@
 parameters:
     inferPrivatePropertyTypeFromConstructor: true
-    level: 8
+    level: max
     paths:
         - app/
         - bin/
         - src/
         - tests/
-    ignoreErrors:
-        -
-            # see https://github.com/phpstan/phpstan/issues/5866
-            message: "#Dead catch - JsonException is never thrown in the try block.#"
-            path: src/JsonToXmlConverter/Converter.php
