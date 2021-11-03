@@ -6,13 +6,9 @@ namespace App\Tests\Controllers;
 
 use App\Controllers\BuildCfdiFromJsonController;
 use App\Tests\TestCase;
-use Dufrei\ApiJsonCfdiBridge\Factory;
 use Dufrei\ApiJsonCfdiBridge\StampService\FinkokStampService;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampErrors;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
-use Dufrei\ApiJsonCfdiBridge\StampService\StampServiceInterface;
-use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeFactory;
-use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeStampService;
 use Dufrei\ApiJsonCfdiBridge\Values\Cfdi;
 use Dufrei\ApiJsonCfdiBridge\Values\Uuid;
 use Dufrei\ApiJsonCfdiBridge\Values\XmlContent;
@@ -26,6 +22,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 final class BuildCfdiFromJsonControllerTest extends TestCase
 {
+    use ContainerWithFakeStampServiceTrait;
+
     private function createValidFormRequestWithJson(string $json): Request
     {
         return $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
@@ -34,19 +32,6 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             'privatekey' => $this->fileContents('fake-csd/EKU9003173C9.key'),
             'passphrase' => trim($this->fileContents('fake-csd/EKU9003173C9-password.txt')),
         ]);
-    }
-
-    private function setUpContainerWithPedefinedStampServiceResponse(Cfdi|StampException|null $result = null): void
-    {
-        $stampService = new FakeStampService(array_filter([$result]));
-        $this->setUpContainerWithFakeStampService($stampService);
-    }
-
-    private function setUpContainerWithFakeStampService(StampServiceInterface $stampService): void
-    {
-        $factory = FakeFactory::create();
-        $factory->setStampService($stampService);
-        $this->getContainer()->add(Factory::class, $factory);
     }
 
     public function testBuildCfdiFromJsonUsingFakeStampService(): void
