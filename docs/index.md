@@ -25,7 +25,7 @@ bin/resource-sat-xml-download
 ```shell
 env AUTHORIZATION_TOKEN='$2y$10$guL9tPaNOeS/6rMGwIy.ZeH/1BmPbcRGiGzjjkRS7SDI0bM9mBMV' \
     FINKOK_PRODUCTION=yes FINKOK_USERNAME='usuario' FINKOK_PASSWORD='secreto' XMLRESOLVER_PATH="resources" \
-    php -S 0.0.0.0:8080 -t public/
+    php -d variables_order=EGPCS -S 0.0.0.0:8080 -t public/
 ```
 
 ## Configuración

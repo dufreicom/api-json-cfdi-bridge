@@ -24,6 +24,7 @@ class Converter implements ConverterInterface
     {
         try {
             $data = json_decode((string) $json, flags: JSON_THROW_ON_ERROR);
+            // @phpstan-ignore-next-line
         } catch (JsonException $exception) {
             throw new JsonToXmlConvertException('Unable to parse JSON', $exception);
         }
@@ -79,7 +80,9 @@ class Converter implements ConverterInterface
         foreach (get_object_vars($contents) as $name => $data) {
             if ('_attributes' === $name && $data instanceof stdClass) {
                 foreach (get_object_vars($data) as $attributeName => $attributeValue) {
-                    $element->setAttribute($attributeName, (string) $attributeValue);
+                    if (is_scalar($attributeValue)) {
+                        $element->setAttribute($attributeName, (string)$attributeValue);
+                    }
                 }
                 continue;
             }

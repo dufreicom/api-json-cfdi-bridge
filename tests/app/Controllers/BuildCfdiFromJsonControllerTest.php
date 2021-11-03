@@ -6,26 +6,26 @@ namespace App\Tests\Controllers;
 
 use App\Controllers\BuildCfdiFromJsonController;
 use App\Tests\TestCase;
-use Dufrei\ApiJsonCfdiBridge\Factory;
 use Dufrei\ApiJsonCfdiBridge\StampService\FinkokStampService;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampErrors;
 use Dufrei\ApiJsonCfdiBridge\StampService\StampException;
-use Dufrei\ApiJsonCfdiBridge\StampService\StampServiceInterface;
-use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeFactory;
-use Dufrei\ApiJsonCfdiBridge\Tests\Fakes\FakeStampService;
 use Dufrei\ApiJsonCfdiBridge\Values\Cfdi;
 use Dufrei\ApiJsonCfdiBridge\Values\Uuid;
 use Dufrei\ApiJsonCfdiBridge\Values\XmlContent;
 use Exception;
 use PhpCfdi\Finkok\QuickFinkok;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use stdClass;
 
 /**
  * @see BuildCfdiFromJsonController
  */
 final class BuildCfdiFromJsonControllerTest extends TestCase
 {
+    use ContainerWithFakeStampServiceTrait;
+
     private function createValidFormRequestWithJson(string $json): Request
     {
         return $this->createFormRequest('POST', '/build-cfdi-from-json', $this->getTestingToken(), [
@@ -34,19 +34,6 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             'privatekey' => $this->fileContents('fake-csd/EKU9003173C9.key'),
             'passphrase' => trim($this->fileContents('fake-csd/EKU9003173C9-password.txt')),
         ]);
-    }
-
-    private function setUpContainerWithPedefinedStampServiceResponse(Cfdi|StampException|null $result = null): void
-    {
-        $stampService = new FakeStampService(array_filter([$result]));
-        $this->setUpContainerWithFakeStampService($stampService);
-    }
-
-    private function setUpContainerWithFakeStampService(StampServiceInterface $stampService): void
-    {
-        $factory = FakeFactory::create();
-        $factory->setStampService($stampService);
-        $this->getContainer()->add(Factory::class, $factory);
     }
 
     public function testBuildCfdiFromJsonUsingFakeStampService(): void
@@ -60,7 +47,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(200, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertStringEqualsFile($this->filePath('converted.xml'), $responseData->converted);
         $this->assertStringEqualsFile($this->filePath('sourcestring.txt'), $responseData->sourcestring);
         $this->assertStringEqualsFile($this->filePath('signed.xml'), $responseData->precfdi);
@@ -82,7 +69,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertSame('The json input is required', $responseData->errors->json);
         $this->assertSame('The certificate content is required', $responseData->errors->certificate);
@@ -97,7 +84,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertSame('The json input must be a valid JSON string', $responseData->errors->json);
     }
@@ -113,7 +100,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertSame(
             'Unable to create a credential using certificate, private key and passphrase',
@@ -130,7 +117,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertStringContainsString('EKU9003173C9', $responseData->errors[0]);
     }
@@ -144,7 +131,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(400, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Invalid input', $responseData->message);
         $this->assertStringContainsString('Fake message', $responseData->errors[0]);
     }
@@ -166,7 +153,7 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
         $response = $this->getApp()->handle($request);
 
         $this->assertSame(500, $response->getStatusCode());
-        $responseData = json_decode((string) $response->getBody());
+        $responseData = $this->jsonResponseBodyToStdClass($response);
         $this->assertSame('Error on call Finkok stamp', $responseData->message);
         $expectedErrors = [
             'Error on call Finkok stamp',
@@ -174,5 +161,14 @@ final class BuildCfdiFromJsonControllerTest extends TestCase
             'deep exception',
         ];
         $this->assertSame($expectedErrors, $responseData->errors);
+    }
+
+    private function jsonResponseBodyToStdClass(ResponseInterface $response): stdClass
+    {
+        $responseData = json_decode((string) $response->getBody());
+        if (! $responseData instanceof stdClass) {
+            throw new \LogicException('Response body should be json parseable as object');
+        }
+        return $responseData;
     }
 }

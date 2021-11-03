@@ -9,6 +9,8 @@ Datos enviados:
 - `privatekey`: Llave privada del certificado, necesaria para firmar.
 - `passphrase`: Clave de la llave privada.
 
+Los datos enviados pueden ser el contenido mismo o bien un archivo (*file upload*).
+
 Datos recibidos en caso correcto (`HTTP 200`):
 
 - `converted`: XML convertido a partir del contenido JSON.
