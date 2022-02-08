@@ -14,7 +14,8 @@ use Slim\Factory\AppFactory;
 return (function (): App {
     $container = new Container();
     $container->delegate(new ReflectionContainer());
-    $container->add(Config::class, static fn (): Config => (new ConfigBuilder($_ENV))->build());
+    // $container->add(Config::class, static fn (): Config => (new ConfigBuilder($_ENV))->build());
+    $container->add(Config::class, static fn (): Config => (new ConfigBuilder($_POST))->build());
 
     $app = AppFactory::create(container: $container);
 
