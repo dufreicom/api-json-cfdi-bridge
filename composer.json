@@ -21,7 +21,7 @@
         "ext-dom": "*",
         "ext-openssl": "*",
         "phpcfdi/credentials": "^1.1",
-        "phpcfdi/finkok": "^0.3.2",
+        "phpcfdi/finkok": "^0.4.0",
         "eclipxe/cfdiutils": "^2.15",
         "slim/slim": "^4.8",
         "slim/psr7": "^1.4",

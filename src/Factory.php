@@ -17,6 +17,13 @@ use Dufrei\ApiJsonCfdiBridge\StampService\StampServiceInterface;
 use PhpCfdi\Finkok\FinkokEnvironment;
 use PhpCfdi\Finkok\FinkokSettings;
 use PhpCfdi\Finkok\QuickFinkok;
+use PhpCfdi\Finkok\Helpers\CancelSigner;
+use PhpCfdi\Finkok\Services\Cancel\CancelSignatureCommand;
+use PhpCfdi\Finkok\Services\Cancel\CancelSignatureResult;
+use PhpCfdi\XmlCancelacion\Models\CancelDocument;
+use PhpCfdi\XmlCancelacion\Models\CancelDocuments;
+use PhpCfdi\Credentials\Credential;
+use PhpCfdi\Finkok\Finkok;
 
 class Factory
 {
@@ -96,5 +103,23 @@ class Factory
             $this->createSignXmlAction($xmlResolver, $xsltBuilder),
             $this->createStampCfdiAction($stampService),
         );
+    }
+
+    public function cancelCfdis($inputs): CancelSignatureResult
+    {
+        $cfdi = $inputs['cfdi'];
+        $finkokUsername = $inputs['finkok-username'];
+        $finkokPassword = $inputs['finkok-password'];
+        $finkokProduction = $inputs['finkok-production'] == 'yes' ? true : false;
+
+        $cancelHelper = new CancelSigner(
+            new CancelDocuments(CancelDocument::newWithErrorsUnrelated($cfdi))
+        );
+        $credential = Credential::create($inputs['certificate'], $inputs['privatekey'], $inputs['passphrase'],$finkokProduction);
+        $cancelXml = $cancelHelper->sign($credential);
+        
+        $finkok = new Finkok(new FinkokSettings($finkokUsername, $finkokPassword));
+        $result = $finkok->cancelSignature(new CancelSignatureCommand($cancelXml));
+        return $result;
     }
 }

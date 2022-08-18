@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\BuildCfdiFromJsonController;
+use App\Controllers\CancelCfdiController;
 use App\Middleware\AuthorizationMiddleware;
 use Dufrei\ApiJsonCfdiBridge\Config;
 use Dufrei\ApiJsonCfdiBridge\ConfigBuilder;
@@ -55,6 +56,7 @@ return (function (): App {
     $errorHandler->forceContentType('application/json');
 
     $app->post('/build-cfdi-from-json', BuildCfdiFromJsonController::class);
+    $app->post('/cancel', CancelCfdiController::class);
 
     return $app;
 })();

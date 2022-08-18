@@ -23,6 +23,12 @@ class CredentialCsd implements Csd
         return $this->credential->certificate()->pemAsOneLine();
     }
 
+    public function getKeyContents(): string
+    {
+        $privateKey = $this->credential->privateKey() -> pem();
+        return implode('', preg_grep('/^((?!-).)*$/', explode(PHP_EOL, $privateKey)) ?: []);
+    }
+
     public function getCertificateNumber(): string
     {
         return $this->credential->certificate()->serialNumber()->bytes();

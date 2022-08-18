@@ -11,7 +11,7 @@ RUN set -e \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ARG GIT_SOURCE=1
+ARG GIT_SOURCE=0
 ARG GIT_REPO="https://github.com/dufreicom/api-json-cfdi-bridge.git"
 ARG GIT_BRANCH="main"
 
